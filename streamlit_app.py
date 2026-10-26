@@ -96,12 +96,26 @@ try:
 except Exception as e:
     df = make_demo()
     st.sidebar.warning(f"Using demo data: {e}")
-    if "valid_values" in globals():
-        if len(valid_values) > 0:
-            else:
-                st.warning(
-            "The raster contains no finite NO2 values. "
-            "Check the Earth Engine export before interpreting this image."
+    valid_values = np.array([])
+
+if len(valid_values) > 0:
+    with st.expander("🔎 Satellite raster diagnostics"):
+        c1, c2, c3 = st.columns(3)
+        c1.metric("Raster width", raster_width)
+        c2.metric("Raster height", raster_height)
+        c3.metric("Valid pixels", len(valid_values))
+
+        st.write("**Coordinate reference system:**", raster_crs)
+        st.write("**Raster bounds:**", tuple(raster_bounds))
+        st.write("**No-data value:**", raster_nodata)
+        st.write("**Minimum NO₂ value:**", float(valid_values.min()))
+        st.write("**Maximum NO₂ value:**", float(valid_values.max()))
+        st.write("**Mean NO₂ value:**", float(valid_values.mean()))
+else:
+    st.warning(
+        "The raster contains no finite NO₂ values. "
+        "Check the Earth Engine export before interpreting this image."
+    )
         )
     with st.expander("🔎 Satellite raster diagnostics"):
         c1, c2, c3 = st.columns(3)
