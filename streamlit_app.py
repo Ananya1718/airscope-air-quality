@@ -70,7 +70,7 @@ def make_demo(seed=7, n=72):
 import rasterio
 from rasterio.transform import xy
 
-RASTER_PATH = "chennai_no2_jan2025.tif"
+RASTER_PATH = "chennai_no2_jan2025_clean.tif"
 
 try:
     with rasterio.open(RASTER_PATH) as src:
@@ -81,6 +81,9 @@ try:
         raster_bounds = src.bounds
         raster_nodata = src.nodata
         valid_values = band.compressed()
+        valid_values = valid_values[
+        np.isfinite(valid_values) & (valid_values != -9999)
+        ]
         valid_values = valid_values[np.isfinite(valid_values)]
         rows, cols = np.indices(band.shape)
         lon, lat = xy(src.transform, rows, cols)
