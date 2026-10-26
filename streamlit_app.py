@@ -116,7 +116,6 @@ else:
         "The raster contains no finite NO₂ values. "
         "Check the Earth Engine export before interpreting this image."
     )
-    )
     with st.expander("🔎 Satellite raster diagnostics"):
         c1, c2, c3 = st.columns(3)
         c1.metric("Raster width", raster_width)
