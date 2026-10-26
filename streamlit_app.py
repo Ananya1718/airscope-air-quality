@@ -234,8 +234,7 @@ elif page == "Explore satellite data":
 
 elif page == "Downscaling lab":
     st.markdown("### Downscaling lab")
-   
-        st.markdown("### Experimental model comparison")
+    st.markdown("### Experimental model comparison")
         st.caption(
             "Experimental only: models were trained on synthetic data "
             "and have not been validated on real Chennai measurements."
