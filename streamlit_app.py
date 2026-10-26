@@ -75,6 +75,12 @@ RASTER_PATH = "chennai_no2_jan2025.tif"
 try:
     with rasterio.open(RASTER_PATH) as src:
         band = src.read(1, masked=True).astype("float64")
+                raster_width = src.width
+        raster_height = src.height
+        raster_crs = str(src.crs)
+        raster_bounds = src.bounds
+        raster_nodata = src.nodata
+        valid_values = band.compressed()
         rows, cols = np.indices(band.shape)
         lon, lat = xy(src.transform, rows, cols)
 
@@ -89,7 +95,19 @@ try:
 except Exception as e:
     df = make_demo()
     st.sidebar.warning(f"Using demo data: {e}")
+if "valid_values" in globals() and len(valid_values) > 0:
+    with st.expander("🔎 Satellite raster diagnostics"):
+        c1, c2, c3 = st.columns(3)
+        c1.metric("Raster width", raster_width)
+        c2.metric("Raster height", raster_height)
+        c3.metric("Valid pixels", len(valid_values))
 
+        st.write("**Coordinate reference system:**", raster_crs)
+        st.write("**Raster bounds:**", tuple(raster_bounds))
+        st.write("**No-data value:**", raster_nodata)
+        st.write("**Minimum NO₂ value:**", float(valid_values.min()))
+        st.write("**Maximum NO₂ value:**", float(valid_values.max()))
+        st.write("**Mean NO₂ value:**", float(valid_values.mean()))
 # -------------------- Header --------------------
 st.markdown("""
 <div class="hero">
