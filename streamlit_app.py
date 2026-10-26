@@ -239,8 +239,7 @@ elif page == "Downscaling lab":
             "Experimental only: models were trained on synthetic data "
             "and have not been validated on real Chennai measurements."
         )
-
-        resolution = st.select_slider(
+    resolution = st.select_slider(
             "Target grid size",
             options=["16 × 16", "32 × 32", "64 × 64"],
             value="32 × 32"
