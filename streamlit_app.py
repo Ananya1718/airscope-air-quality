@@ -291,24 +291,58 @@ elif page == "Downscaling lab":
             ["FNO", "AM-FNO"],
             default=["FNO", "AM-FNO"]
         )
-    if st.button("Prepare comparison", type="primary"):
+    
+        if st.button("Prepare comparison", type="primary"):
             if not MODELS_LOADED:
-                st.error(
-                    "Models could not be loaded. Check the sidebar "
-                    "warning and Streamlit logs."
-                )
+                st.error("Models could not be loaded. Check the sidebar warning.")
             elif not model_choice:
                 st.warning("Select at least one model.")
             else:
-                st.info(
-                    f"Models loaded successfully. Selected: "
-                    f"{', '.join(model_choice)}. Target grid: {resolution}."
-                )
-                st.warning(
-                    "Predictions are not generated yet. The satellite "
-                    "raster must first be prepared in the five-channel "
-                    "input format expected by the models."
-                )
+                try:
+                    raster_2d = np.asarray(
+                        band.filled(np.nan), dtype=np.float32
+                    )
+                    valid_mask = np.isfinite(raster_2d) & (raster_2d != -9999)
+
+                    if not valid_mask.any():
+                        st.error("No valid satellite pixels were found.")
+                    else:
+                        raster_2d[~valid_mask] = np.nanmean(
+                            raster_2d[valid_mask]
+                        )
+                        grid_size = int(resolution.split()[0])
+                        results = {}
+
+                        if "FNO" in model_choice:
+                            results["FNO"] = run_experimental_inference(
+                                fno_model, raster_2d, grid_size
+                            )
+
+                        if "AM-FNO" in model_choice:
+                            results["AM-FNO"] = run_experimental_inference(
+                                amfno_model, raster_2d, grid_size
+                            )
+
+                        cols = st.columns(len(results))
+                        for col, (name, output) in zip(cols, results.items()):
+                            with col:
+                                st.markdown(f"#### {name} experimental output")
+                                fig = px.imshow(
+                                    output,
+                                    aspect="auto",
+                                    color_continuous_scale="Viridis",
+                                    labels={"color": "Model output"}
+                                )
+                                st.plotly_chart(fig, use_container_width=True)
+
+                        st.warning(
+                            "Experimental outputs only. These models were "
+                            "trained on synthetic data and are not validated "
+                            "for real Chennai pollution estimation."
+                        )
+                except Exception as e:
+                    st.error(f"Inference failed: {e}")
+
 
 
 elif page == "Model evaluation":
