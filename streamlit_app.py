@@ -98,8 +98,8 @@ except Exception as e:
     st.sidebar.warning(f"Using demo data: {e}")
     if "valid_values" in globals():
         if len(valid_values) > 0:
-                else:
-        st.warning(
+            else:
+                st.warning(
             "The raster contains no finite NO2 values. "
             "Check the Earth Engine export before interpreting this image."
         )
