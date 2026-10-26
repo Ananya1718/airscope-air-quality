@@ -75,7 +75,7 @@ RASTER_PATH = "chennai_no2_jan2025.tif"
 try:
     with rasterio.open(RASTER_PATH) as src:
         band = src.read(1, masked=True).astype("float64")
-                raster_width = src.width
+        raster_width = src.width
         raster_height = src.height
         raster_crs = str(src.crs)
         raster_bounds = src.bounds
