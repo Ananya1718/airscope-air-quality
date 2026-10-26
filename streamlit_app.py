@@ -160,6 +160,48 @@ else:
         st.write("**Minimum NO₂ value:**", float(valid_values.min()))
         st.write("**Maximum NO₂ value:**", float(valid_values.max()))
         st.write("**Mean NO₂ value:**", float(valid_values.mean()))
+        
+def run_experimental_inference(model, raster_values, grid_size=32):
+    """Experimental inference; not validated for real-world pollution."""
+    import torch
+    import torch.nn.functional as F
+
+    values = np.asarray(raster_values, dtype=np.float32)
+    values = np.nan_to_num(
+        values, nan=0.0, posinf=0.0, neginf=0.0
+    )
+
+    if values.ndim != 2:
+        raise ValueError("Expected a 2D raster.")
+
+    tensor = torch.from_numpy(values)[None, None, :, :]
+    tensor = F.interpolate(
+        tensor,
+        size=(grid_size, grid_size),
+        mode="bilinear",
+        align_corners=False
+    )
+
+    no2 = tensor[0, 0]
+    grad_y, grad_x = torch.gradient(no2)
+
+    coords_y, coords_x = torch.meshgrid(
+        torch.linspace(-1, 1, grid_size),
+        torch.linspace(-1, 1, grid_size),
+        indexing="ij"
+    )
+
+    features = torch.stack(
+        [no2, grad_x, grad_y, coords_x, coords_y],
+        dim=0
+    ).unsqueeze(0)
+
+    model.eval()
+    with torch.no_grad():
+        prediction = model(features).squeeze().cpu().numpy()
+
+    return prediction
+
 # -------------------- Header --------------------
 st.markdown("""
 <div class="hero">
