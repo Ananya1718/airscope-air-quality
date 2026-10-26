@@ -3,6 +3,8 @@ import numpy as np
 import pandas as pd
 import plotly.express as px
 from datetime import date
+import torch
+from models import FNO2d, AMFNO2d
 
 st.set_page_config(
     page_title="AirScope | NO₂ Downscaling",
@@ -33,6 +35,33 @@ st.markdown("""
     h2, h3 { color: #eaf2ff; }
 </style>
 """, unsafe_allow_html=True)
+
+@st.cache_resource
+def load_models():
+    device = torch.device("cpu")
+
+    fno = FNO2d(in_channels=5, width=24, modes=8)
+    fno.load_state_dict(
+        torch.load("fno_model.pth", map_location=device)
+    )
+    fno.eval()
+
+    amfno = AMFNO2d(in_channels=5, width=24, modes=8)
+    amfno.load_state_dict(
+        torch.load("amfno_model.pth", map_location=device)
+    )
+    amfno.eval()
+
+    return fno, amfno
+
+
+try:
+    fno_model, amfno_model = load_models()
+    MODELS_LOADED = True
+except Exception as e:
+    MODELS_LOADED = False
+    st.sidebar.warning(f"Models not loaded: {e}")
+
 
 # -------------------- Sidebar --------------------
 st.sidebar.markdown("## 🌍 AirScope")
