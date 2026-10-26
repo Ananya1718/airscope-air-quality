@@ -81,6 +81,7 @@ try:
         raster_bounds = src.bounds
         raster_nodata = src.nodata
         valid_values = band.compressed()
+        valid_values = valid_values[np.isfinite(valid_values)]
         rows, cols = np.indices(band.shape)
         lon, lat = xy(src.transform, rows, cols)
 
@@ -95,7 +96,13 @@ try:
 except Exception as e:
     df = make_demo()
     st.sidebar.warning(f"Using demo data: {e}")
-if "valid_values" in globals() and len(valid_values) > 0:
+    if "valid_values" in globals():
+        if len(valid_values) > 0:
+                else:
+        st.warning(
+            "The raster contains no finite NO2 values. "
+            "Check the Earth Engine export before interpreting this image."
+        )
     with st.expander("🔎 Satellite raster diagnostics"):
         c1, c2, c3 = st.columns(3)
         c1.metric("Raster width", raster_width)
