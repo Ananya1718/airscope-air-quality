@@ -234,23 +234,44 @@ elif page == "Explore satellite data":
 
 elif page == "Downscaling lab":
     st.markdown("### Downscaling lab")
-    st.write("Compare a coarse input grid with model outputs once the trained checkpoints and compatible inputs are connected.")
-    a, b, c = st.columns(3)
-    with a:
-        st.markdown("#### Coarse input")
-        st.image("https://placehold.co/480x300/14213d/e8eef9?text=Coarse+satellite+grid", use_container_width=True)
-    with b:
-        st.markdown("#### FNO output")
-        st.image("https://placehold.co/480x300/164e63/e8eef9?text=FNO+prediction", use_container_width=True)
-    with c:
-        st.markdown("#### AM-FNO output")
-        st.image("https://placehold.co/480x300/3f315b/e8eef9?text=AM-FNO+prediction", use_container_width=True)
-    st.warning("Model outputs are not connected in this UI scaffold yet. The placeholders are not predictions. We will connect your trained model and exported input next.")
-    st.markdown("#### Run settings")
-    resolution = st.select_slider("Target grid size", options=["16 × 16", "32 × 32", "64 × 64"], value="32 × 32")
-    model_choice = st.multiselect("Models to compare", ["FNO", "AM-FNO"], default=["FNO", "AM-FNO"])
-    if st.button("Prepare comparison", type="primary"):
-        st.info(f"Comparison settings saved for {resolution}: {', '.join(model_choice) if model_choice else 'no models selected'}. Connect model weights to generate actual outputs.")
+   
+        st.markdown("### Experimental model comparison")
+        st.caption(
+            "Experimental only: models were trained on synthetic data "
+            "and have not been validated on real Chennai measurements."
+        )
+
+        resolution = st.select_slider(
+            "Target grid size",
+            options=["16 × 16", "32 × 32", "64 × 64"],
+            value="32 × 32"
+        )
+
+        model_choice = st.multiselect(
+            "Models to compare",
+            ["FNO", "AM-FNO"],
+            default=["FNO", "AM-FNO"]
+        )
+
+        if st.button("Prepare comparison", type="primary"):
+            if not MODELS_LOADED:
+                st.error(
+                    "Models could not be loaded. Check the sidebar "
+                    "warning and Streamlit logs."
+                )
+            elif not model_choice:
+                st.warning("Select at least one model.")
+            else:
+                st.info(
+                    f"Models loaded successfully. Selected: "
+                    f"{', '.join(model_choice)}. Target grid: {resolution}."
+                )
+                st.warning(
+                    "Predictions are not generated yet. The satellite "
+                    "raster must first be prepared in the five-channel "
+                    "input format expected by the models."
+                )
+
 
 elif page == "Model evaluation":
     st.markdown("### Model evaluation")
