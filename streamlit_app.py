@@ -249,8 +249,7 @@ elif page == "Downscaling lab":
             ["FNO", "AM-FNO"],
             default=["FNO", "AM-FNO"]
         )
-
-        if st.button("Prepare comparison", type="primary"):
+    if st.button("Prepare comparison", type="primary"):
             if not MODELS_LOADED:
                 st.error(
                     "Models could not be loaded. Check the sidebar "
