@@ -67,8 +67,28 @@ def make_demo(seed=7, n=72):
     field = np.clip(field, 0, None)
     return pd.DataFrame({"longitude": xx.ravel(), "latitude": yy.ravel(), "no2": field.ravel()})
 
-df = make_demo()
-st.sidebar.info("Demo mode: illustrative heatmap. Replace with exported Earth Engine data for measured values.")
+import rasterio
+from rasterio.transform import xy
+
+RASTER_PATH = "chennai_no2_jan2025.tif"
+
+try:
+    with rasterio.open(RASTER_PATH) as src:
+        band = src.read(1, masked=True).astype("float64")
+        rows, cols = np.indices(band.shape)
+        lon, lat = xy(src.transform, rows, cols)
+
+        df = pd.DataFrame({
+            "longitude": np.asarray(lon).ravel(),
+            "latitude": np.asarray(lat).ravel(),
+            "no2": np.asarray(band.filled(np.nan)).ravel()
+        }).dropna()
+
+    st.sidebar.success("Loaded Earth Engine GeoTIFF")
+
+except Exception as e:
+    df = make_demo()
+    st.sidebar.warning(f"Using demo data: {e}")
 
 # -------------------- Header --------------------
 st.markdown("""
