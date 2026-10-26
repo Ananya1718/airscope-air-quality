@@ -244,8 +244,7 @@ elif page == "Downscaling lab":
             options=["16 × 16", "32 × 32", "64 × 64"],
             value="32 × 32"
         )
-
-        model_choice = st.multiselect(
+    model_choice = st.multiselect(
             "Models to compare",
             ["FNO", "AM-FNO"],
             default=["FNO", "AM-FNO"]
